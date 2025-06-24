@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import yfinance as yf
 from datetime import date
 
-def plot_sma_windows(df,
+def plot_windows(df,
                      close_col: str = 'Close',
                      short_col: str = 'sma_short',
                      long_col: str = 'sma_long',
@@ -99,6 +100,58 @@ def plot_signals(df,
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
     plt.legend(by_label.values(), by_label.keys(), loc="upper left")
+
+    return fig, ax
+
+
+def plot_strategy(df,
+                  in_position = None,
+                  hold_col: str = 'price_cum_ret',
+                  strategy_col: str = 'strategy_cum_ret'):
+
+    """
+    Plot strategy returns versus buy & hold returns
+
+        df: A DataFrame Containing Price Data
+
+        in_position: Boolean series indicating when we are in / out of position. Used to highlight position on the chart.
+
+        hold_col: The column within the specified df that contains buy and hold returns
+            default = 'price_cum_ret'
+
+        strategy_col: The column within the specified df that contains strategy returns
+            default = 'strategy_cum_ret'
+    """
+
+    fig, ax = plt.subplots(figsize=(14,7))
+    ax.set_title("Buy & Hold vs Strategy Returns Over Time", fontsize=20)
+    ax.set_ylabel("Cumulative Return Percentage %", fontsize=12)
+    ax.plot(df['price_cum_ret'], label='Buy & Hold Returns')
+    ax.plot(df['strategy_cum_ret'], label='Strategy Returns')
+    ax.grid(alpha=1, linestyle=":")
+    ax.spines[["top", "right"]].set(visible=False)
+
+    if type(in_position) != type(None):
+
+        y_min, y_max = ax.get_ybound()
+
+        ax.fill_between(df.index,
+                        y_max,
+                        y_min,
+                        where=in_position==True,
+                        color='Green',
+                        alpha=0.1,
+                        label='In Position')
+
+        ax.fill_between(df.index,
+                        y_max,
+                        y_min,
+                        where=in_position==False,
+                        color='Red',
+                        alpha=0.1,
+                        label='Out of Position')
+
+    ax.legend(loc="upper left")
 
     return fig, ax
 
