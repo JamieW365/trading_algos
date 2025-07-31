@@ -66,8 +66,7 @@ def plot_signals(df,
                  buy_markers,
                  sell_markers,
                  close_col: str = 'Close',
-                 short_col: str = 'sma_short',
-                 long_col: str = 'sma_long'):
+                 in_position = None):
     
     fig, ax = plt.subplots(figsize=(14,7))
 
@@ -78,23 +77,25 @@ def plot_signals(df,
     ax.spines[["top", "right"]].set(visible=False)
     ax.grid(alpha=0.3)
 
-    y_min, y_max = ax.get_ybound()
+    if type(in_position) != type(None):
 
-    ax.fill_between(df.index,
-                    y_max,
-                    y_min,
-                    where=(df[short_col] > df[long_col]),
-                    color='Green',
-                    alpha=0.1,
-                    label='In Position')
+        y_min, y_max = ax.get_ybound()
 
-    ax.fill_between(df.index,
-                    y_max,
-                    y_min,
-                    where=(df[short_col] < df[long_col]),
-                    color='Red',
-                    alpha=0.1,
-                    label='Out of Position')
+        ax.fill_between(df.index,
+                        y_max,
+                        y_min,
+                        where=in_position==True,
+                        color='Green',
+                        alpha=0.1,
+                        label='In Position')
+
+        ax.fill_between(df.index,
+                        y_max,
+                        y_min,
+                        where=in_position==False,
+                        color='Red',
+                        alpha=0.1,
+                        label='Out of Position')
 
     # Prevents duplicate keys being added to the legend
     handles, labels = plt.gca().get_legend_handles_labels()
