@@ -1,11 +1,3 @@
-# trading_algos
-
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
-
-A collection of algorithmic trading strategies, backtested and documented in individual notebooks.
-
 # Project Folder Overview
 
 This repository contains a collection of quantitative finance mini-projects exploring trading algorithms, portfolio optimization, and related analytical workflows.  
@@ -15,9 +7,9 @@ Each mini-project includes a short summary in this file and links to its own det
 
 # Contents
 - [Trading Algorithms](#trading-algorithms)
-  - [TA Project 1](#ta-project-1)
-  - [TA Project 2](#ta-project-2)
-  - [TA Project 3](#ta-project-3)
+  - [Simple Moving Average](#simple-moving-average)
+  - [Bollinger With RSI](#bollinger-with-rsi)
+  - [Momentum Trading](#momentum-trading)
   - [TA Project 4](#ta-project-4)
   - [TA Project 5](#ta-project-5)
 - [Portfolio Optimization](#portfolio-optimization)
@@ -31,15 +23,15 @@ Each mini-project includes a short summary in this file and links to its own det
 
 ## Trading Algorithms
 
-### TA Project 1
+### Simple Moving Average
 **Short description:** _Add a brief summary here._  
 **Full report:** [TA Project 1 Report](./trading_algorithms/ta_project_1.md)
 
-### TA Project 2
+### Bollinger With RSI
 **Short description:** _Add a brief summary here._  
 **Full report:** [TA Project 2 Report](./trading_algorithms/ta_project_2.md)
 
-### TA Project 3
+### Momentum Trading
 **Short description:** _Add a brief summary here._  
 **Full report:** [TA Project 3 Report](./trading_algorithms/ta_project_3.md)
 
@@ -77,6 +69,9 @@ Each mini-project includes a short summary in this file and links to its own det
 
 ---
 
+<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
+    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
+</a>
 
 ## Project Organization
 
