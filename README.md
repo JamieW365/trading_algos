@@ -6,6 +6,78 @@
 
 A collection of algorithmic trading strategies, backtested and documented in individual notebooks.
 
+# Project Folder Overview
+
+This repository contains a collection of quantitative finance mini-projects exploring trading algorithms, portfolio optimization, and related analytical workflows.  
+Each mini-project includes a short summary in this file and links to its own detailed report.
+
+---
+
+# Contents
+- [Trading Algorithms](#trading-algorithms)
+  - [TA Project 1](#ta-project-1)
+  - [TA Project 2](#ta-project-2)
+  - [TA Project 3](#ta-project-3)
+  - [TA Project 4](#ta-project-4)
+  - [TA Project 5](#ta-project-5)
+- [Portfolio Optimization](#portfolio-optimization)
+  - [PO Project 1](#po-project-1)
+  - [PO Project 2](#po-project-2)
+  - [PO Project 3](#po-project-3)
+  - [PO Project 4](#po-project-4)
+  - [PO Project 5](#po-project-5)
+
+---
+
+## Trading Algorithms
+
+### TA Project 1
+**Short description:** _Add a brief summary here._  
+**Full report:** [TA Project 1 Report](./trading_algorithms/ta_project_1.md)
+
+### TA Project 2
+**Short description:** _Add a brief summary here._  
+**Full report:** [TA Project 2 Report](./trading_algorithms/ta_project_2.md)
+
+### TA Project 3
+**Short description:** _Add a brief summary here._  
+**Full report:** [TA Project 3 Report](./trading_algorithms/ta_project_3.md)
+
+### TA Project 4
+**Short description:** _Add a brief summary here._  
+**Full report:** [TA Project 4 Report](./trading_algorithms/ta_project_4.md)
+
+### TA Project 5
+**Short description:** _Add a brief summary here._  
+**Full report:** [TA Project 5 Report](./trading_algorithms/ta_project_5.md)
+
+---
+
+## Portfolio Optimization
+
+### PO Project 1
+**Short description:** _Add a brief summary here._  
+**Full report:** [PO Project 1 Report](./portfolio_optimization/po_project_1.md)
+
+### PO Project 2
+**Short description:** _Add a brief summary here._  
+**Full report:** [PO Project 2 Report](./portfolio_optimization/po_project_2.md)
+
+### PO Project 3
+**Short description:** _Add a brief summary here._  
+**Full report:** [PO Project 3 Report](./portfolio_optimization/po_project_3.md)
+
+### PO Project 4
+**Short description:** _Add a brief summary here._  
+**Full report:** [PO Project 4 Report](./portfolio_optimization/po_project_4.md)
+
+### PO Project 5
+**Short description:** _Add a brief summary here._  
+**Full report:** [PO Project 5 Report](./portfolio_optimization/po_project_5.md)
+
+---
+
+
 ## Project Organization
 
 ```
