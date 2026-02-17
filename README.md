@@ -29,7 +29,7 @@ Each mini-project includes a short summary in this file and links to its own det
 
 ### Bollinger With RSI
 **Short description:** _Add a brief summary here._  
-**Full report:** [TA Project 2 Report](./trading_algorithms/ta_project_2.md)
+**Full report:** [TA Project 2 Report](./project2_bollinger/bollinger.md)
 
 ### Momentum Trading
 **Short description:** _Add a brief summary here._  
