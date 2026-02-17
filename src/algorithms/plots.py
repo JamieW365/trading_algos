@@ -4,7 +4,7 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 
-from trading_algos.config import FIGURES_DIR, PROCESSED_DATA_DIR
+from algorithms.config import FIGURES_DIR, PROCESSED_DATA_DIR
 
 app = typer.Typer()
 
