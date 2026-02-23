@@ -2,6 +2,8 @@
 data/
 src/datasets/data
 
+notebooks/tests
+
 # Mac OS-specific storage files
 .DS_Store
 
