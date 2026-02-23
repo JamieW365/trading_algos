@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+# import random
 import warnings
 
 def get_sp500_meta(get_latest: bool=False):
@@ -30,7 +31,8 @@ def get_sp500_meta(get_latest: bool=False):
 
     # Make a new call to Wikipedia to retrieve the latest S&P metadata
     if get_latest:
-        # Attempt to retrieve the latest S&P information from Wikipedia
+        # Attempt to retrieve the latest S&P information from Wikipedia. There is always a chance that this
+        # will fail. Catch any error and fallback on loading saved data if necessary.
         try:
             wiki = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies',
                                 storage_options={'User-Agent': 'pandas'},
@@ -57,9 +59,24 @@ def get_sp500_meta(get_latest: bool=False):
     return df_current
 
 def get_sp500_tickers(get_latest: bool=False):
-    
+
     '''
     Returns the up to date list of stocks currently in the S&P 500 from Wikipedia
     '''
 
     return get_sp500_meta(get_latest = get_latest).index.tolist()
+
+def load_data(tickers,
+              start_date: None = None,
+              end_date: None = None,
+              columns: list = ['Close']):
+    
+    '''
+    This function downloads stock data from yfinance in a way that is consistent for use throughout the trading_algos
+    repository
+    '''
+
+    df_stocks = yf.download(tickers, start=start_date, end=end_date)[columns]
+
+
+    return df_stocks
