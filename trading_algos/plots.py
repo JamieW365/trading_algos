@@ -6,6 +6,7 @@ import typer
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter
+import seaborn as sns
 
 from trading_algos.config import FIGURES_DIR, PROCESSED_DATA_DIR
 
@@ -25,7 +26,7 @@ def plot_returns(data: pd.DataFrame,
     if highlight == None:
         highlight = data.columns
     highlight = set(highlight)
-    
+
     fig, ax = plt.subplots(figsize=figsize)
 
     ax.set_title('Normalized Returns' if normalize else 'Stock Price')
@@ -49,6 +50,71 @@ def plot_returns(data: pd.DataFrame,
     ax.spines[['top', 'right']].set_visible(False)
 
     return plt.show();
+
+def plot_risk_return(data,
+                     figsize: tuple=(8, 8),
+                     save_plot: str=None):
+
+    '''
+    Plot Risk/Return
+    
+    Takes a summary table and plots risk verus return in a scatter plot
+    '''
+    
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    for asset in data.index:
+        ax.annotate(asset, xy=[data.loc[asset, 'Risk']+0.002, data.loc[asset,'Return']+0.002])
+
+    ax.scatter(data=data, x='Risk', y='Return')
+
+    ax.set_title('Risk/Return')
+    ax.set_ylabel('ann. Return')
+    ax.set_xlabel('ann. Risk')
+
+    ax.set_aspect('equal')
+    ax.grid(alpha=0.3)
+
+    return plt.show();
+
+def plot_sharpe(data,
+                sorted: bool=True):
+    
+    '''
+    Bar plot of Sharpe ratio
+
+    Takes a summary table and plots the Sharpe ratio of each asset in a bar plot
+    '''
+
+    # Ensure that the input dataset isnt overwritten by this function
+    _data = data.copy()
+
+    if sorted:
+        _data.sort_values('Sharpe', ascending=False, inplace=True)
+
+    fig, ax = plt.subplots()
+
+    # sns.color_palette
+    sns.barplot(x='Sharpe', 
+                y=_data.index, 
+                data=_data, 
+                hue='Sharpe', 
+                palette=sns.color_palette("ch:start=.2,rot=-.3", as_cmap=True), 
+                ax=ax)
+    
+    for asset in data.index:
+        ax.annotate(text=round(data.loc[asset,'Sharpe'],2),
+                    xy=[data.loc[asset,'Sharpe'] + 0.02, asset])
+
+    ax.set_title('Sharpe')
+    ax.spines[['top', 'right', 'bottom']].set_visible(False)
+    ax.set_xticks([])
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+
+    ax.legend().remove()
+
+
 
 
 @app.command()
