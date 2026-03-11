@@ -53,6 +53,7 @@ def plot_returns(data: pd.DataFrame,
 
 def plot_risk_return(data,
                      figsize: tuple=(8, 8),
+                     ax=None,
                      save_plot: str=None):
 
     '''
@@ -61,24 +62,33 @@ def plot_risk_return(data,
     Takes a summary table and plots risk verus return in a scatter plot
     '''
     
-    fig, ax = plt.subplots(figsize=figsize)
+    if ax == None:
+        fig, ax = plt.subplots(figsize=figsize)
     
     for asset in data.index:
         ax.annotate(asset, xy=[data.loc[asset, 'Risk']+0.002, data.loc[asset,'Return']+0.002])
 
-    ax.scatter(data=data, x='Risk', y='Return')
+    sns.scatterplot(data=data,
+                    x='Risk',
+                    y='Return',
+                    hue='Sharpe',
+                    size='Sharpe',
+                    palette=sns.color_palette("ch:start=.2,rot=-.3", as_cmap=True), 
+                    ax=ax)
+    # ax.scatter(data=data, x='Risk', y='Return')
 
     ax.set_title('Risk/Return')
     ax.set_ylabel('ann. Return')
     ax.set_xlabel('ann. Risk')
-
     ax.set_aspect('equal')
     ax.grid(alpha=0.3)
+    ax.legend().remove()
 
-    return plt.show();
+    return ax
 
 def plot_sharpe(data,
-                sorted: bool=True):
+                sorted: bool=True,
+                ax=None):
     
     '''
     Bar plot of Sharpe ratio
@@ -92,7 +102,8 @@ def plot_sharpe(data,
     if sorted:
         _data.sort_values('Sharpe', ascending=False, inplace=True)
 
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
 
     # sns.color_palette
     sns.barplot(x='Sharpe', 
@@ -111,9 +122,9 @@ def plot_sharpe(data,
     ax.set_xticks([])
     ax.set_xlabel('')
     ax.set_ylabel('')
-
     ax.legend().remove()
 
+    return ax
 
 
 
