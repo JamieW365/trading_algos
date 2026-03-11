@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 import warnings
+from trading_algos.utils import calc_returns
 
 def select_n(n: int=5,
              stocks: list=[],
@@ -37,3 +38,25 @@ def calculate_weights(df_stocks,
             raise ValueError(f'{method} an invalid weighting method, input a pre-defined weighting methodology.')
 
     return weights
+
+def portfolio_returns(data,
+                      method: str='EWP'):
+    
+    '''
+    Calculate the portfolio returns on a selection of stocks for a given optimization method
+    '''
+
+    
+    # Run weighting calculations dependent on the selected methodology
+    match method:
+        # Equal Weighted Portfolio
+        case 'EWP':
+            # Each asset is given a weight of 1/N for N assets
+            df_returns = calc_returns(data)
+            df_returns[method] = df_returns.dot(calculate_weights(data))
+
+        # ValueError if an invalid methodology is into the function
+        case _:
+            raise ValueError(f'{method} an invalid weighting method, input a pre-defined weighting methodology.')
+
+    return df_returns
