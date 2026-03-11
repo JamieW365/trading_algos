@@ -12,23 +12,27 @@ from trading_algos.config import FIGURES_DIR, PROCESSED_DATA_DIR
 app = typer.Typer()
 
 def plot_returns(data: pd.DataFrame,
+                 returns: bool=False,
                  figsize: tuple=(12,6),
                  normalize: bool=False,
                  rolling_window: int=1,
                  highlight: list=None,
                  save_plot: str=None):
 
-    if highlight == None:
-        highlight = data.Close.columns
-    highlight = set(highlight)
+    if returns:
+        data = (1 + data).cumprod()
 
+    if highlight == None:
+        highlight = data.columns
+    highlight = set(highlight)
+    
     fig, ax = plt.subplots(figsize=figsize)
 
     ax.set_title('Normalized Returns' if normalize else 'Stock Price')
 
-    for stock in data.Close:
-        ax.plot(data.Close[stock]\
-                .div(data.Close[stock].iloc[0] if normalize else 1)\
+    for stock in data:
+        ax.plot(data[stock]\
+                .div(data[stock].iloc[0] if normalize else 1)\
                     .mul(100 if normalize else 1)\
                         .sub(100 if normalize else 0)\
                             .rolling(rolling_window)\
@@ -40,7 +44,7 @@ def plot_returns(data: pd.DataFrame,
     if normalize:
         ax.yaxis.set_major_formatter(PercentFormatter())
         
-    ax.legend(labels=data.Close.columns)
+    ax.legend(labels=data.columns)
     ax.grid(alpha=0.3)
     ax.spines[['top', 'right']].set_visible(False)
 
