@@ -4,6 +4,7 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 import pandas as pd
+import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import seaborn as sns
@@ -104,8 +105,7 @@ def plot_sharpe(data,
 
     if ax is None:
         fig, ax = plt.subplots()
-
-    # sns.color_palette
+        
     sns.barplot(x='Sharpe', 
                 y=_data.index, 
                 data=_data, 
@@ -126,7 +126,80 @@ def plot_sharpe(data,
 
     return ax
 
+def plot_summary(data,
+                 plots: list=['rr', 'sharpe'],
+                 ncols: int=2):
+    
+    '''
+    Take a summary table and plot a dynamic grid of requested summary charts
+    '''
 
+    # Ensure that the input dataset is never overwritten within this function
+    _data = data.copy()
+
+    # Check input type
+    if type(plots) == str:
+        plots = [plots]
+
+    # Defualt list of valid plots
+    valid_plots = ['rr', 'sharpe']
+    # Check input list for invalid plot types and remove them
+    invalid_plots = [x for x in plots if x not in valid_plots]
+    # Remove invalid plots as well as any duplicates
+    plots = list(set(plots) - set(invalid_plots))
+    # Restore original order
+    plots = [x for x in plots if x in plots]
+
+    # Flag any invalid plots that have been ignored
+    if invalid_plots != []:
+        print(invalid_plots, 'plots are invalid and will be skipped')
+    # Error if no valid plot types have passed into the function
+    if plots == []:
+        raise Exception('Pass in atlease one valid plot type', valid_plots)
+
+    # Do not need more columns in the grid than we have plots
+    ncols = min(ncols, len(plots))
+
+    # Calculate the number of columns required within the subplot
+    # Dependent on the number of columns specified and the number of plots required to be shown
+    nrows = int(np.ceil(len(plots) / ncols))
+
+    # Generate a new figure with reference axes
+    fig, ax = plt.subplots(nrows, ncols, figsize=(6*ncols, 6*nrows), tight_layout=True)
+
+    # Set a figure title if creating a multi-plot grid
+    if len(plots) > 1:
+        fig.suptitle('Summary Plots')
+
+    for i, plot in enumerate(plots):
+        # Determine the row within the subplot grid to place the current plot
+        sp_row = int(i/ncols)
+        # Determine the column within the subplot grid to place the current plot
+        sp_col = i%ncols
+        # Axes reference will change dependent on the number of columns and rows which will effect iteration logic
+        sp_ax = ax if (nrows == 1 and ncols == 1) else\
+                ax[sp_row] if ncols == 1 else\
+                ax[sp_col] if nrows == 1 else\
+                ax[sp_row, sp_col]
+        
+        # Plot charts dependent on listed order position
+        match plot:
+            # Risk/Return scatter
+            case 'rr':
+                plot_risk_return(_data, ax=sp_ax)
+
+            # Sharpe bar chart
+            case 'sharpe':
+                plot_sharpe(_data, ax=sp_ax)
+                            
+    # Determine how many empty plots there are on the last row of the figure
+    num_empty_plots = nrows * ncols - len(plots)
+    if num_empty_plots > 0:
+        for i in range(1, num_empty_plots + 1):
+            # Hide empty plots
+            ax[nrows, ncols - i].set_axis_off()
+
+    return fig, ax
 
 @app.command()
 def main(
