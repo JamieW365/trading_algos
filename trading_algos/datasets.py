@@ -127,23 +127,58 @@ def get_sp500_tickers(get_latest: bool=False):
     return get_sp500_meta(get_latest=get_latest, meta_table='current').index.tolist()
 
 def load_data(tickers: list=None,
-              file: str=None,
-              filepath: str=tac.RAW_DATA_DIR,
               start_date: None = None,
               end_date: None = None,
-              columns: list = ['Close']):
+              columns: list = None,
+              filename: str=None,
+              filepath: str=tac.RAW_DATA_DIR,):
     
     '''
     This function downloads stock data from yfinance in a way that is
     consistent for use throughout the trading_algos repository
     '''
+    if columns:
+        # Ensure that the correct type is passed for columns
+        if not isinstance(columns, (list, str, tuple)):
+            raise Exception('Invalid data type for: columns')
 
-    if file != None:
-        df_stocks = pd.read_csv(filepath/file,
+        # Allow for different types to be passed into columns and use
+        # the appropriate method to conver them into a list
+        if type(columns) != list:
+            match columns:
+                case str():
+                    columns = [columns]
+                case tuple():
+                    columns = list(columns)
+
+    # Load data from a previously saved file
+    if filename != None:
+        # All stock data should be saved in the default format for
+        # standard use throughout the project
+        df_stocks = pd.read_csv(filepath/filename,
                                 header=[0,1],
                                 index_col=0)
+        # Ensure that datetime index is preserved
         df_stocks.index = pd.to_datetime(df_stocks.index)
-    else:
-        df_stocks = yf.download(tickers, start=start_date, end=end_date)[columns]
+        if columns:
+            return df_stocks[columns]
+        else:
+            return df_stocks
         
-    return df_stocks
+    # Otherwise load fresh stock data from Yahoo Finance
+    else:
+        if columns:
+            df_stocks = yf.download(tickers, start=start_date, end=end_date,)[columns]
+        else:
+            df_stocks = yf.download(tickers, start=start_date, end=end_date)
+        
+        if 'Adj Close' in df_stocks.columns:
+            df_stocks.drop('Adj Close', axis=1, inplace=True)
+
+        return df_stocks
+
+def save_data(data: pd.DataFrame,
+              filename: str,
+              filepath: str=tac.RAW_DATA_DIR):
+    
+    data.to_csv(filepath/filename)
