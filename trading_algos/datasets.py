@@ -204,8 +204,13 @@ def load_data(tickers:     list = None,
             
             # Ensure that column names are preserved
             df_stocks.columns = mi[positions]
+
             # Ensure that datetime index is preserved
             df_stocks.index = pd.to_datetime(df_stocks.index)
+
+            # Filter data between given start and end date
+            df_stocks = df_stocks.loc[start_date:end_date]
+
             return df_stocks
 
         # All stock data should be saved in the default format for
