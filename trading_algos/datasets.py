@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from datetime import datetime
 # import random
 import warnings
 
@@ -126,16 +127,37 @@ def get_sp500_tickers(get_latest: bool=False):
 
     return get_sp500_meta(get_latest=get_latest, meta_table='current').index.tolist()
 
-def load_data(tickers: list=None,
-              start_date: None = None,
-              end_date: None = None,
-              columns: list = None,
-              filename: str=None,
-              filepath: str=tac.RAW_DATA_DIR,):
+def load_data(tickers:     list = None,
+              start_date:  str  = '1900',
+              end_date:    str  = datetime.today().strftime('%Y-%m-%d'),
+              columns:     list = None,
+              auto_adjust: bool = True,
+              filename:    str  = None,
+              filepath:    str  = tac.RAW_DATA_DIR):
     
     '''
-    This function downloads stock data from yfinance in a way that is
-    consistent for use throughout the trading_algos repository
+    This function downloads stock data from either a local source or
+    yfinance in a way that is consistent for use throughout the
+    trading_algos repository.
+
+    Parameters
+        tickers (str, list)
+            List of tickers to download.
+
+        start (str)
+            Download start date string (YYYY-MM-DD) or _datetime,
+            inclusive. Default is 1900-01-01.
+            E.g. for start='2020-01-01', the first data point will be on
+            '2020-01-01'
+
+        end (str)
+            Download end date string (YYYY-MM-DD) or _datetime,
+            exclusive. Default is now.
+
+        columns (str, iterable)
+            Columns to be included in the output. All columns are
+            returned by default. 
+
     '''
     if columns:
         # Ensure that the correct type is passed for columns
@@ -153,26 +175,68 @@ def load_data(tickers: list=None,
 
     # Load data from a previously saved file
     if filename != None:
+        if tickers or columns:
+
+            if not tickers:
+                tickers = slice(None)
+            if not columns:
+                columns = slice(None)
+
+            # Load headers from csv file
+            headers = pd.read_csv(filepath/filename, index_col=0, header=[0,1], nrows=0)
+            # Store column headers as a multi-index
+            mi = headers.columns
+            # Ignore any stocks that arent included in the data file
+            avail_stocks = [x for x in tickers if x in set(mi.get_level_values(1))]
+            # Identifying column positions of selected stocks
+            positions = mi.get_locs([columns, avail_stocks])
+            # Ensure that file structure is maintained on load
+            positions = np.sort(positions)
+            # Add 1 to positions to account for index loading
+            usecols = [0] + (positions + 1).tolist()
+
+            # All stock data should be saved in the default format for
+            # standard use throughout the project
+            df_stocks = pd.read_csv(filepath/filename,
+                                    index_col=0,
+                                    skiprows=2,
+                                    usecols=usecols)
+            
+            # Ensure that column names are preserved
+            df_stocks.columns = mi[positions]
+            # Ensure that datetime index is preserved
+            df_stocks.index = pd.to_datetime(df_stocks.index)
+            return df_stocks
+
         # All stock data should be saved in the default format for
         # standard use throughout the project
         df_stocks = pd.read_csv(filepath/filename,
                                 header=[0,1],
-                                index_col=0)
+                                index_col=0,
+                                usecols=usecols)
         # Ensure that datetime index is preserved
         df_stocks.index = pd.to_datetime(df_stocks.index)
         if columns:
-            return df_stocks[columns]
-        else:
-            return df_stocks
+            df_stocks = df_stocks[columns]
+
+        return df_stocks.loc[start_date:end_date]
         
     # Otherwise load fresh stock data from Yahoo Finance
     else:
         if columns:
-            df_stocks = yf.download(tickers, start=start_date, end=end_date,)[columns]
+            df_stocks = yf.download(tickers, 
+                                    start=start_date, 
+                                    end=end_date, 
+                                    auto_adjust=auto)[columns]
         else:
-            df_stocks = yf.download(tickers, start=start_date, end=end_date)
-        
-        if 'Adj Close' in df_stocks.columns:
+            df_stocks = yf.download(tickers,
+                                    start=start_date,
+                                    end=end_date,
+                                    auto_adjust=auto_adjust)
+            
+        # If auto_adjust is True then Adj Close should not be returned
+        # Close will contain adjusted close prices by default
+        if auto_adjust and 'Adj Close' in df_stocks.columns:
             df_stocks.drop('Adj Close', axis=1, inplace=True)
 
         return df_stocks
