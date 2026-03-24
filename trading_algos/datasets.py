@@ -95,20 +95,78 @@ def get_sp500_meta(get_latest:       bool = False,
     except Exception as err:
         raise Exception(err)
     
-def calc_sp500_survivors(get_latest: bool = True):
+def calc_sp500_survivors(get_latest: bool = False,
+                         start_date: str  = '1900',
+                         end_date:   str  = datetime.today().strftime('%Y-%m-%d')):
 
+    # The following nested functions will be used to mask any date where 
+    # stocks are not to be included in the S&P500 timeline due to being
+    # either added beyond the given start date, or removed before the
+    # given end date.
+
+    # Mask removed stocks
+    def filter_removed(ticker):
+        if ticker in df_stocks.columns.get_level_values(1).unique():
+            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(start, df_removed[df_removed['Ticker']==ticker].index[0], freq='B'))
+    # Mask added stocks
+    def filter_added(ticker):
+        if ticker in df_stocks.columns.get_level_values(1).unique():
+            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(df_added[df_added['Symbol']==ticker].index[0], end, freq='B'))
+
+    # Load S&P Metadata from Wikipedia or local repo
     df_current, df_changes = get_sp500_meta(get_latest=get_latest)
-    df_changes_added = df_changes['Added'].copy()
-    df_changes_removed = df_changes['Removed'].copy()
+
+    # Identify the stocks that have been added to the S&P500 within the
+    # selected date range.
+    df_added = df_current[(end_date >= df_current.index) & 
+                          (df_current.index >= start_date)].copy()
+    
+    # Identify the stocks that have been removed from the S&P500 within
+    # the selected date range.
+
+    df_removed = df_changes['Removed'][(end_date >= df_changes.index) &
+                                       (df_changes.index >= start_date)].copy()
+    # Sometimes spin-off stocks will be temporarily added to the S&P500
+    # without removing any other stocks. This is to ensure that there 
+    # are no immediate changes in index holding. As a result there may 
+    # be some null entries in the removed table which can be ignored.
+    df_removed.dropna(inplace=True)
+
+    # The total list of stocks that have been included in the S&P500
+    # at any point within the selected date range
+    stocks = df_current['Symbol'].tolist() + df_removed['Ticker'].tolist()
+
+    # Load the latest stock data from yFinance or from local repo
+    # May error if local data does not exist or yFinance is having
+    # issues
+    try:
+        df_stocks = load_data(filename=None if get_latest else 'sap500alltime.csv' ,
+                              tickers=stocks,
+                              start_date=start_date,
+                              end_date=end_date)
+    # If local file does not exist then recommend that the user run with
+    # get_latest set to True
+    except Exception as err:
+        raise err
+    
+
+
+    # df_changes_added = df_changes['Added'].copy()
+    # df_changes_removed = df_changes['Removed'].copy()
 
 
 
-    return df_current, df_changes
+    return df_stocks
 
-def get_sp500(get_latest: bool = False):
+def get_sp500(get_latest: bool = False,
+              survivors:  bool = True,
+              start_date: str  = '1900',
+              end_date:   str  = datetime.today().strftime('%Y-%m-%d')):
 
     if get_latest:
-        return calc_sp500_survivors(get_latest=get_latest)
+        df_stocks = load_data(stocklist,
+                                   start_date=start,
+                                   end_date=end)
 
     else:
         try:
