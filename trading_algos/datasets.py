@@ -107,11 +107,11 @@ def calc_sp500_survivors(get_latest: bool = False,
     # Mask removed stocks
     def filter_removed(ticker):
         if ticker in df_stocks.columns.get_level_values(1).unique():
-            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(start, df_removed[df_removed['Ticker']==ticker].index[0], freq='B'))
+            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(start_date, df_removed[df_removed['Ticker']==ticker].index[0], freq='B'))
     # Mask added stocks
     def filter_added(ticker):
         if ticker in df_stocks.columns.get_level_values(1).unique():
-            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(df_added[df_added['Symbol']==ticker].index[0], end, freq='B'))
+            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(df_added[df_added['Symbol']==ticker].index[0], end_date, freq='B'))
 
     # Load S&P Metadata from Wikipedia or local repo
     df_current, df_changes = get_sp500_meta(get_latest=get_latest)
@@ -144,18 +144,24 @@ def calc_sp500_survivors(get_latest: bool = False,
                               tickers=stocks,
                               start_date=start_date,
                               end_date=end_date)
+        # Default all dtypes to float to prevent any issues in masking
+        df_stocks = df_stocks.astype(float)
+        
+        print('data loaded')
     # If local file does not exist then recommend that the user run with
     # get_latest set to True
     except Exception as err:
         raise err
     
+    for ticker in df_removed['Ticker']:
+        filter_removed(ticker)
+    for ticker in df_added['Symbol']:
+        filter_added(ticker)
 
-
-    # df_changes_added = df_changes['Added'].copy()
-    # df_changes_removed = df_changes['Removed'].copy()
-
-
-
+    # Save to local repo for easier access in testing
+    save_data(df_stocks,
+              'sap500alltimesurvivors.csv')
+    
     return df_stocks
 
 def get_sp500(get_latest: bool = False,
@@ -191,7 +197,8 @@ def load_data(tickers:     list = None,
               columns:     list = None,
               auto_adjust: bool = True,
               filename:    str  = None,
-              filepath:    str  = tac.RAW_DATA_DIR):
+              filepath:    str  = tac.RAW_DATA_DIR,
+              usecols           = None):
     
     '''
     This function downloads stock data from either a local source or
