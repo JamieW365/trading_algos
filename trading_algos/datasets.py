@@ -96,8 +96,34 @@ def get_sp500_meta(get_latest:       bool = False,
         raise Exception(err)
     
 def calc_sp500_survivors(get_latest: bool = False,
-                         start_date: str  = '1900',
+                         start_date: str  = '1900-01-01',
                          end_date:   str  = datetime.today().strftime('%Y-%m-%d')):
+
+    '''
+    Returns a full price dataset for S&P500 stocks whilst accounting for
+    survivorship bias. Includes data for all stocks that were included
+    in the S&P500 index at any point within a given date range. Price
+    data is masked for any period that each stock was not included, due
+    to being added or removed from the index after or before the given
+    start and end dates.
+
+    Parameters
+        get_latest (bool, default=False)
+            If True then will load the latest metadata from Wikipedia
+            before downloading the latest stock data from Yahoo Finance.
+            If False then the most recently saved meta and stock data
+            will be loaded from the local repository.
+        
+        start_date (str, default='1900-01-01')
+            Download start date string (YYYY-MM-DD) or _datetime,
+            inclusive. Default is 1900-01-01.
+            E.g. for start='2020-01-01', the first data point will be on
+            '2020-01-01'
+
+        end_date (str, default=today)
+            Download end date string (YYYY-MM-DD) or _datetime,
+            exclusive. Default is now.
+    '''
 
     # The following nested functions will be used to mask any date where 
     # stocks are not to be included in the S&P500 timeline due to being
@@ -107,11 +133,23 @@ def calc_sp500_survivors(get_latest: bool = False,
     # Mask removed stocks
     def filter_removed(ticker):
         if ticker in df_stocks.columns.get_level_values(1).unique():
-            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(start_date, df_removed[df_removed['Ticker']==ticker].index[0], freq='B'))
+            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] =\
+                df_stocks.loc[:, pd.IndexSlice[: ,ticker]]\
+                    .reindex(
+                        pd.date_range(start_date,
+                                      df_removed[df_removed['Ticker']==ticker].index[0],
+                                      freq='B')
+                            )
     # Mask added stocks
     def filter_added(ticker):
         if ticker in df_stocks.columns.get_level_values(1).unique():
-            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] = df_stocks.loc[:, pd.IndexSlice[: ,ticker]].reindex(pd.date_range(df_added[df_added['Symbol']==ticker].index[0], end_date, freq='B'))
+            df_stocks.loc[:, pd.IndexSlice[: ,ticker]] =\
+                df_stocks.loc[:, pd.IndexSlice[: ,ticker]]\
+                    .reindex(
+                        pd.date_range(df_added[df_added['Symbol']==ticker].index[0],
+                                      end_date,
+                                      freq='B')
+                            )
 
     # Load S&P Metadata from Wikipedia or local repo
     df_current, df_changes = get_sp500_meta(get_latest=get_latest)
@@ -166,21 +204,35 @@ def calc_sp500_survivors(get_latest: bool = False,
 
 def get_sp500(get_latest: bool = False,
               survivors:  bool = True,
-              start_date: str  = '1900',
+              start_date: str  = '1900-01-01',
               end_date:   str  = datetime.today().strftime('%Y-%m-%d')):
+    
+    '''
+    Retrieves price data for individual stocks that were included
+    in the S&P500 index at any point betwen the given the given start
+    and end dates. Will account for survivorship bias by default, but
+    can be overwritten to return full price data for the entire time
+    period.
+    '''
 
+    # Retrieve the latest metadata from Wikipedia and the latest stock
+    # data from Yahoo Finance before accounting for survivorship bias
+    # if the flag is set.
     if get_latest:
-        df_stocks = load_data(stocklist,
-                                   start_date=start,
-                                   end_date=end)
-
+        # get the latest metadata
+        # get the full list of tickers to download
+        # download the latest data from yahoo finance
+        # if survivors
+        #   account for survivorship bias
+        pass # NEED TO BUILD
+    # Oterwise, load S&P500 from local repository accounting for 
+    # survivorship bias if the flag is set.
     else:
-        try:
-            pass
-        except:
-            pass
+        _df = load_data(filename=f'sap500alltime{"survivors" if survivors else ""}.csv',
+                        start_date=start_date,
+                        end_date=end_date)
 
-    pass
+    return _df
 
 def get_sp500_tickers(get_latest: bool=False):
 
