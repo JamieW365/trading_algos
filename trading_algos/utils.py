@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def calc_returns(df_stocks):
 
@@ -35,3 +36,37 @@ def get_returns_summary(data,
     df_summary
 
     return df_summary
+
+def stock_slice(data: pd.DataFrame = pd.DataFrame(),
+                ticker: str = None):
+    
+    _df = data.copy()
+    return _df.loc[:, pd.IndexSlice[: ,ticker]]
+
+def head_tail(data: pd.DataFrame = pd.DataFrame(),
+              n:    int          = 3):
+    
+    '''
+    Returns both the head and tail of a dataframe at the same time
+    '''
+
+    if data.empty:
+        return
+    
+    _df_ht = pd.concat([data.head(n), data.tail(n)])
+
+    return _df_ht
+
+    # This code adds a divider to the output, making it clear where the
+    # head and tail is. Some work needs to be done to improve the 
+    # formatting
+    # mid = len(_df_ht) // 2  # middle row index
+
+    # styled = _df_ht.style.format_index(lambda x: x.strftime('%Y-%m-%d')).set_table_styles([
+    #     {
+    #         'selector': f'tr:nth-child({mid + 1}) th, tr:nth-child({mid + 1}) td',
+    #         'props': [('border-top', '2px solid black')]
+    #     }
+    # ], overwrite=False)
+
+    # return styled
