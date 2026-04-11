@@ -17,28 +17,38 @@ def plot_returns(data: pd.DataFrame,
                  returns: bool=False,
                  figsize: tuple=(12,6),
                  normalize: bool=False,
-                 rolling_window: int=1,
+                 rolling: int=1,
                  highlight: list=None,
                  save_plot: str=None):
+    
+    # Copy dataset so that it is not overwritten outside of this function
+    _df = data.copy()
 
+    # Normalize data so that all start from the same position, showing
+    # a clearer picture of the actual trend
+    if normalize:
+        for col in _df:
+            # Normalize by dividing by the first valid value. Some 
+            # stocks may have missing data that will cause issue. This 
+            # means that all stocks will begin at a normalized price 
+            # value of 0 units
+            _df[col] = _df[col].div(_df.loc[_df[col].first_valid_index(), col]) * 100 - 100
+
+    # If a returns dataset has been flagged then convert into actualised
+    # returns for charting
     if returns:
-        data = (1 + data).cumprod()
+        _df = (1 + _df).cumprod()
 
     if highlight == None:
-        highlight = data.columns
+        highlight = _df.columns
     highlight = set(highlight)
 
     fig, ax = plt.subplots(figsize=figsize)
 
     ax.set_title('Normalized Returns' if normalize else 'Stock Price')
 
-    for stock in data:
-        ax.plot(data[stock]\
-                .div(data[stock].iloc[0] if normalize else 1)\
-                    .mul(100 if normalize else 1)\
-                        .sub(100 if normalize else 0)\
-                            .rolling(rolling_window)\
-                                .mean(),
+    for stock in _df:
+        ax.plot(_df[stock].rolling(rolling).mean(),
                 label=stock,
                 alpha=1 if stock in highlight else 0.25,
                 linewidth=1.5 if stock in highlight else 1)
@@ -46,7 +56,7 @@ def plot_returns(data: pd.DataFrame,
     if normalize:
         ax.yaxis.set_major_formatter(PercentFormatter())
         
-    ax.legend(labels=data.columns)
+    ax.legend(labels=_df.columns)
     ax.grid(alpha=0.3)
     ax.spines[['top', 'right']].set_visible(False)
 
