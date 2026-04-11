@@ -13,16 +13,17 @@ from trading_algos.config import FIGURES_DIR, PROCESSED_DATA_DIR
 
 app = typer.Typer()
 
-def plot_returns(data: pd.DataFrame,
-                 returns: bool=False,
-                 figsize: tuple=(12,6),
-                 normalize: bool=False,
-                 rolling: int=1,
-                 highlight: list=None,
-                 save_plot: str=None):
+def trend(data: pd.DataFrame,
+          filter: str='Close',
+          normalize: bool=False,
+          returns: bool=False,
+          figsize: tuple=(12,6),
+          rolling: int=1,
+          highlight: list=None,
+          save_plot: str=None):
     
     # Copy dataset so that it is not overwritten outside of this function
-    _df = data.copy()
+    _df = data[filter].copy()
 
     # Normalize data so that all start from the same position, showing
     # a clearer picture of the actual trend
@@ -45,7 +46,7 @@ def plot_returns(data: pd.DataFrame,
 
     fig, ax = plt.subplots(figsize=figsize)
 
-    ax.set_title('Normalized Returns' if normalize else 'Stock Price')
+    ax.set_title('Close Price - Normalized' if normalize else 'Close Price')
 
     for stock in _df:
         ax.plot(_df[stock].rolling(rolling).mean(),
