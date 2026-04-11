@@ -230,7 +230,7 @@ def get_sp500(get_latest: bool = False,
     else:
         _df = load_data(filename=f'sap500alltime{"survivors" if survivors else ""}.csv',
                         start_date=start_date,
-                        end_date=end_date)
+                        end_date=end_date).dropna(how='all', axis=1)
 
     return _df
 
