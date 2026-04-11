@@ -317,7 +317,7 @@ def load_data(tickers:     list = None,
             df_stocks = pd.read_csv(filepath/filename,
                                     index_col=0,
                                     skiprows=2,
-                                    usecols=usecols)
+                                    usecols=usecols).astype(float)
             
             # Ensure that column names are preserved
             df_stocks.columns = mi[positions]
