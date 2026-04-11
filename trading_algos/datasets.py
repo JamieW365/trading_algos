@@ -238,10 +238,18 @@ def get_sp500_tickers(get_latest: bool=False):
 
     '''
     Returns the up to date list of stocks currently in the S&P 500 from
-    Wikipedia
+    Wikipedia.
+
+    Parameters
+        get_latest (bool)
+            Flag whether to retrieve the most up to date data from 
+            Wikipedia, or load most recently saved information from
+            local repository. Default = False.
     '''
 
-    return get_sp500_meta(get_latest=get_latest, meta_table='current').index.tolist()
+    # Retrieve the current meta table and return the list of comprised
+    # stocks
+    return get_sp500_meta(get_latest=get_latest, meta_table='current')['Symbol'].tolist()
 
 def load_data(tickers:     list = None,
               start_date:  str  = '1900',
