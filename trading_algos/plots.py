@@ -95,11 +95,14 @@ def plot_risk_return(data,
     ax.set_title('Risk/Return')
     ax.set_ylabel('ann. Return')
     ax.set_xlabel('ann. Risk')
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
     ax.grid(alpha=0.3)
     ax.legend().remove()
 
-    return fig, ax
+    if ax is None:
+        return fig, ax
+    else:
+        return ax
 
 def plot_sharpe(data,
                 sorted: bool=True,
@@ -138,7 +141,10 @@ def plot_sharpe(data,
     ax.set_ylabel('')
     ax.legend().remove()
 
-    return fig, ax
+    if ax is None:
+        return fig, ax
+    else:
+        return ax
 
 def plot_summary(data,
                  plots: list=['rr', 'sharpe'],
