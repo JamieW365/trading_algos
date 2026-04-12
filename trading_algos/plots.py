@@ -23,7 +23,15 @@ def trend(data: pd.DataFrame,
           save_plot: str=None):
     
     # Copy dataset so that it is not overwritten outside of this function
-    _df = data[filter].copy()
+    if returns:
+        _df = data.copy()
+    else:
+        _df = data[filter].copy()
+        
+    # If a returns dataset has been flagged then convert into actualised
+    # returns for charting
+    if returns:
+        _df = (1 + _df).cumprod()
 
     # Normalize data so that all start from the same position, showing
     # a clearer picture of the actual trend
@@ -34,11 +42,6 @@ def trend(data: pd.DataFrame,
             # means that all stocks will begin at a normalized price 
             # value of 0 units
             _df[col] = _df[col].div(_df.loc[_df[col].first_valid_index(), col]) * 100 - 100
-
-    # If a returns dataset has been flagged then convert into actualised
-    # returns for charting
-    if returns:
-        _df = (1 + _df).cumprod()
 
     if highlight == None:
         highlight = _df.columns
@@ -51,17 +54,17 @@ def trend(data: pd.DataFrame,
     for stock in _df:
         ax.plot(_df[stock].rolling(rolling).mean(),
                 label=stock,
-                alpha=1 if stock in highlight else 0.25,
+                alpha=1 if stock in highlight else 0.4,
                 linewidth=1.5 if stock in highlight else 1)
         
     if normalize:
         ax.yaxis.set_major_formatter(PercentFormatter())
         
     ax.legend(labels=_df.columns)
-    ax.grid(alpha=0.3)
+    ax.grid(alpha=0.25)
     ax.spines[['top', 'right']].set_visible(False)
 
-    return plt.show();
+    return fig, ax
 
 def plot_risk_return(data,
                      figsize: tuple=(8, 8),
