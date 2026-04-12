@@ -99,7 +99,7 @@ def plot_risk_return(data,
     ax.grid(alpha=0.3)
     ax.legend().remove()
 
-    return ax
+    return fig, ax
 
 def plot_sharpe(data,
                 sorted: bool=True,
@@ -138,7 +138,7 @@ def plot_sharpe(data,
     ax.set_ylabel('')
     ax.legend().remove()
 
-    return ax
+    return fig, ax
 
 def plot_summary(data,
                  plots: list=['rr', 'sharpe'],
