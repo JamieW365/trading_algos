@@ -79,9 +79,6 @@ def plot_risk_return(data,
     
     if ax == None:
         fig, ax = plt.subplots(figsize=figsize)
-    
-    for asset in data.index:
-        ax.annotate(asset, xy=[data.loc[asset, 'Risk']+0.002, data.loc[asset,'Return']+0.002])
 
     sns.scatterplot(data=data,
                     x='Risk',
@@ -90,7 +87,14 @@ def plot_risk_return(data,
                     size='Sharpe',
                     palette=sns.color_palette("ch:start=.2,rot=-.3", as_cmap=True), 
                     ax=ax)
-    # ax.scatter(data=data, x='Risk', y='Return')
+
+    x_offset = (ax.get_xlim()[1] - ax.get_xlim()[0]) * 0.015
+    y_offset = (ax.get_ylim()[1] - ax.get_ylim()[0]) * 0.015
+
+    for asset in data.index:
+        ax.annotate(asset, 
+                    xy=[data.loc[asset, 'Risk'] + x_offset, 
+                        data.loc[asset, 'Return']+ y_offset])
 
     ax.set_title('Risk/Return')
     ax.set_ylabel('ann. Return')
