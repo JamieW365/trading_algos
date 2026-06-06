@@ -70,3 +70,20 @@ def head_tail(data: pd.DataFrame = pd.DataFrame(),
     # ], overwrite=False)
 
     # return styled
+
+def outlier_bounds(x = pd.Series,
+                   percentiles: float = 0.25,
+                   outlier_range: float = 1.5,
+                   method: str = 'IQR'):
+
+    '''
+    Returns the upper and lower bounds for outliers for a given series
+    '''
+
+    lq = x.quantile(percentiles)
+    uq = x.quantile(1-percentiles)
+    iqr = uq - lq
+    lo = lq - outlier_range*iqr
+    uo = uq + outlier_range*iqr
+
+    return lo, uo
