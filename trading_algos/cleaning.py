@@ -78,7 +78,7 @@ def nulls_summary(data = pd.DataFrame):
 
     # Focus on columns where intermittent nulls exist
     stats = stats[stats.notna()]
-
+    
     # Format as dataframe
     df_null = pd.DataFrame(stats.tolist(), index=stats.index)
 
@@ -146,7 +146,7 @@ def pipeline(data: pd.DataFrame,
 
     # Firstly identify possible tickers for smoothing and any tickers
     # as well as any tickers that are too problematic to keep 
-    df_nulls = nulls_summary(data)
+    df_nulls = nulls_summary(data.Close)
 
     # Dropping any tickers that have more than 5% of internal data missing
     # or have atleast one period of 5 or more consecutive missing data points
@@ -156,23 +156,25 @@ def pipeline(data: pd.DataFrame,
     # Remaining tickers with missing data points will be smoothed out with
     # the rolling weekly median
     smooth_tickers = df_nulls.drop(problem_tickers).index.tolist()
-
+    print('smoothing:', smooth_tickers)
     # Smooth the stocks identified for smoothing
-    data[smooth_tickers] = data[smooth_tickers].apply(smooth,
-                                                      window=smoothing_window,
-                                                      min_periods=smoothing_min_periods,
-                                                      method=smoothing_method)
+    data.loc[:, pd.IndexSlice[:, smooth_tickers]] = \
+        data.loc[:, pd.IndexSlice[:, smooth_tickers]]\
+            .apply(smooth,
+                   window=smoothing_window,
+                   min_periods=smoothing_min_periods,
+                   method=smoothing_method)
     
     # After smoothing, identify stocks with extreme price movements
     # We may look to smooth stocks with limited extremes, replacing spikes
     # by the median, for now I will simply drop any potentially problematic
     # stocks
     # Dropping any tickers that have extreme price movements
-    problem_tickers += identify_spikes(data).index.tolist()
+    problem_tickers += identify_spikes(data.Close).index.tolist()
     problem_tickers = list(set(problem_tickers))
-
+    print('dropping', problem_tickers)
     # Remove any problematic stocks from the dataset
-    data = data.drop(problem_tickers, axis=1)
+    data = data.drop(problem_tickers, axis=1, level=1)
 
     # Return cleaned dataset
     return data
