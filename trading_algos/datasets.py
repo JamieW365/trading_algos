@@ -5,13 +5,13 @@ from datetime import datetime
 # import random
 import warnings
 
-from trading_algos import config as tac
+from trading_algos import config
 
 def get_sp500_meta(get_latest:       bool = False,
                    meta_table:       str  = 'full',
-                   curr_path:        str  = tac.EXTERNAL_DATA_DIR,
+                   curr_path:        str  = config.EXTERNAL_DATA_DIR,
                    curr_filename:    str  = 'sp500_current.csv',
-                   changes_path:     str  = tac.EXTERNAL_DATA_DIR,
+                   changes_path:     str  = config.EXTERNAL_DATA_DIR,
                    changes_filename: str  = 'sp500_changes.csv'):
 
     '''
@@ -257,7 +257,7 @@ def load_data(tickers:     list = None,
               columns:     list = None,
               auto_adjust: bool = True,
               filename:    str  = None,
-              filepath:    str  = tac.RAW_DATA_DIR,
+              filepath:    str  = config.RAW_DATA_DIR,
               usecols           = None):
     
     '''
@@ -373,6 +373,6 @@ def load_data(tickers:     list = None,
 
 def save_data(data: pd.DataFrame,
               filename: str,
-              filepath: str=tac.RAW_DATA_DIR):
+              filepath: str=config.RAW_DATA_DIR):
     
     data.to_csv(filepath/filename)
