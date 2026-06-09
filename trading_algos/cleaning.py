@@ -86,6 +86,57 @@ def nulls_summary(data = pd.DataFrame):
 
     return df_null
 
+def identify_spikes(data: pd.DataFrame,
+                    data_format: str='normprice'):
+    
+    '''
+    Identifies and produces a summary of extreme price movements for
+    every ticker
+    '''
+
+    data = data.copy()
+
+    # If standard price data is passed in then convert into daily log returns
+    if data_format == 'normprice':
+        data = np.log(data) - np.log(data).shift(1)
+    else:
+        raise ValueError(f'{data_format} an invalid format')
+    
+    # Abnormaly large price changes directly both preceded and followed by
+    # comparatively small price movements.
+    isolated_spikes = (
+        # Abnormaly large daily change (> 170%)
+        abs(data > 1).mask(data.isna(), np.nan) &
+        # Followed by a comparatively smally daily change (< 10.5%)
+        (abs(data.shift(1) < 0.1).mask(data.isna(), np.nan) &
+        # Preceded by a comparitively small daily change (< 10.5%)
+        abs(data.shift(-1) < 0.1).mask(data.isna(), np.nan))
+        ).sum()
+
+    # Abnormaly large price changes followed directly by an abnormaly large
+    # reversal.
+    reversal_spikes = (
+        (((data > 1) & (data.shift(1) < -1)) | 
+        ((data < 1) & (data.shift(1) > 1)))
+    ).sum()
+
+    # Identifying all abnormal price movements that deviate enourmously
+    # from the monthly median price
+    rolling_med = data.rolling(21).median()
+    residual_spikes = (abs(data - rolling_med) > 2).sum()
+
+    problem_counts = pd.concat(
+        [isolated_spikes[isolated_spikes!=0],
+        reversal_spikes[reversal_spikes!=0],
+        residual_spikes[residual_spikes!=0]], 
+        axis=1)\
+            .fillna(0)\
+                .astype(int)
+
+    problem_counts.columns = ['Isolated Spikes', 'Spike Reversals', 'Extreme Price Movements']
+    return problem_counts
+
+
 def pipeline(data: pd.DataFrame,
              smoothing_window: int=5,
              smoothing_min_periods: int=1,
@@ -112,4 +163,16 @@ def pipeline(data: pd.DataFrame,
                                                       min_periods=smoothing_min_periods,
                                                       method=smoothing_method)
     
+    # After smoothing, identify stocks with extreme price movements
+    # We may look to smooth stocks with limited extremes, replacing spikes
+    # by the median, for now I will simply drop any potentially problematic
+    # stocks
+    # Dropping any tickers that have extreme price movements
+    problem_tickers += identify_spikes(data).index.tolist()
+    problem_tickers = list(set(problem_tickers))
+
+    # Remove any problematic stocks from the dataset
+    data = data.drop(problem_tickers, axis=1)
+
+    # Return cleaned dataset
     return data
