@@ -87,3 +87,24 @@ def outlier_bounds(x = pd.Series,
     uo = uq + outlier_range*iqr
 
     return lo, uo
+
+def outliers_list(data: pd.DataFrame,
+                  columns: list = None,
+                  percentiles: float = 0.25,
+                  outlier_range: float = 1.5,
+                  method: str = 'IQR'):
+
+    if columns != None:
+        data = data[columns].copy()
+
+    # Get the upper and lower IQR bounds for outliers
+    bounds = data.apply(
+        outlier_bounds, percentiles = percentiles,
+                       outlier_range = outlier_range, 
+                       method = method)
+    
+    # Identify stocks that sit beyond outlier thresholds for risk or return
+    df_outliers = data[((data > bounds.iloc[1]) | (data < bounds.iloc[0]))\
+                        .any(axis=1)]
+    
+    return df_outliers.index.tolist()
