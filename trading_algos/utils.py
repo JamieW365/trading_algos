@@ -57,20 +57,6 @@ def head_tail(data: pd.DataFrame = pd.DataFrame(),
 
     return _df_ht
 
-    # This code adds a divider to the output, making it clear where the
-    # head and tail is. Some work needs to be done to improve the 
-    # formatting
-    # mid = len(_df_ht) // 2  # middle row index
-
-    # styled = _df_ht.style.format_index(lambda x: x.strftime('%Y-%m-%d')).set_table_styles([
-    #     {
-    #         'selector': f'tr:nth-child({mid + 1}) th, tr:nth-child({mid + 1}) td',
-    #         'props': [('border-top', '2px solid black')]
-    #     }
-    # ], overwrite=False)
-
-    # return styled
-
 def outlier_bounds(x = pd.Series,
                    percentiles: float = 0.25,
                    outlier_range: float = 1.5,
