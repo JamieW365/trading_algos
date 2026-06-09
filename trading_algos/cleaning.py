@@ -85,3 +85,31 @@ def nulls_summary(data = pd.DataFrame):
     df_null[df_null.columns[:4]] = df_null[df_null.columns[:4]].astype(int)
 
     return df_null
+
+def pipeline(data: pd.DataFrame,
+             smoothing_window: int=5,
+             smoothing_min_periods: int=1,
+             smoothing_method: str='median'):
+
+    data = data.copy()
+
+    # Firstly identify possible tickers for smoothing and any tickers
+    # as well as any tickers that are too problematic to keep 
+    df_nulls = nulls_summary(data)
+
+    # Dropping any tickers that have more than 5% of internal data missing
+    # or have atleast one period of 5 or more consecutive missing data points
+    problem_tickers = df_nulls[(df_nulls['Max Duration'] > smoothing_window-1) | 
+                               (df_nulls['Pct Null'] >= 5)].index.tolist()
+
+    # Remaining tickers with missing data points will be smoothed out with
+    # the rolling weekly median
+    smooth_tickers = df_nulls.drop(problem_tickers).index.tolist()
+
+    # Smooth the stocks identified for smoothing
+    data[smooth_tickers] = data[smooth_tickers].apply(smooth,
+                                                      window=smoothing_window,
+                                                      min_periods=smoothing_min_periods,
+                                                      method=smoothing_method)
+    
+    return data
