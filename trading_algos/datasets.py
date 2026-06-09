@@ -179,6 +179,7 @@ def calc_sp500_survivors(get_latest: bool = False,
     # issues
     try:
         df_stocks = load_data(filename=None if get_latest else 'sap500alltime.csv' ,
+                              filepath=config.PROCESSED_DATA_DIR,
                               tickers=stocks,
                               start_date=start_date,
                               end_date=end_date)
@@ -198,7 +199,8 @@ def calc_sp500_survivors(get_latest: bool = False,
 
     # Save to local repo for easier access in testing
     save_data(df_stocks,
-              'sap500alltimesurvivors.csv')
+              'sap500alltimesurvivors.csv',
+              filepath=config.PROCESSED_DATA_DIR)
     
     return df_stocks
 
@@ -229,6 +231,7 @@ def get_sp500(get_latest: bool = False,
     # survivorship bias if the flag is set.
     else:
         _df = load_data(filename=f'sap500alltime{"survivors" if survivors else ""}.csv',
+                        filepath=config.PROCESSED_DATA_DIR,
                         start_date=start_date,
                         end_date=end_date).dropna(how='all', axis=1)
 
