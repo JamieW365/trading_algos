@@ -237,7 +237,8 @@ def get_sp500(get_latest: bool = False,
 
     return _df
 
-def get_sp500_tickers(get_latest: bool=False):
+def get_sp500_tickers(survivors: bool = False,
+                      filepath:  str  = config.PROCESSED_DATA_DIR,):
 
     '''
     Returns the up to date list of stocks currently in the S&P 500 from
@@ -250,9 +251,14 @@ def get_sp500_tickers(get_latest: bool=False):
             local repository. Default = False.
     '''
 
-    # Retrieve the current meta table and return the list of comprised
-    # stocks
-    return get_sp500_meta(get_latest=get_latest, meta_table='current')['Symbol'].tolist()
+    filename=f'sap500alltime{"survivors" if survivors else ""}.csv'
+
+    # Load headers from csv file
+    headers = pd.read_csv(filepath/filename, index_col=0, header=[0,1], nrows=0)
+    # Store column headers as a multi-index
+    mi = headers.columns
+
+    return list(set(mi.get_level_values(1)))
 
 def load_data(tickers:     list = None,
               start_date:  str  = '1900',
