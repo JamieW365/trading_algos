@@ -261,7 +261,7 @@ def get_sp500_tickers(survivors: bool = False,
     return list(set(mi.get_level_values(1)))
 
 def load_data(tickers:     list = None,
-              start_date:  str  = '1900',
+              start_date:  str  = '1900-01-01',
               end_date:    str  = datetime.today().strftime('%Y-%m-%d'),
               columns:     list = None,
               auto_adjust: bool = True,
