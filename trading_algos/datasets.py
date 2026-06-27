@@ -264,9 +264,10 @@ def load_data(tickers:     list = None,
               start_date:  str  = '1900-01-01',
               end_date:    str  = datetime.today().strftime('%Y-%m-%d'),
               columns:     list = None,
+              local:       bool = True,
               auto_adjust: bool = True,
               filename:    str  = None,
-              filepath:    str  = config.RAW_DATA_DIR,
+              filepath:    str  = config.PROCESSED_DATA_DIR,
               usecols           = None):
     
     '''
@@ -292,6 +293,9 @@ def load_data(tickers:     list = None,
             Columns to be included in the output. All columns are
             returned by default. 
 
+        local (bool)
+            If TRUE then will load from locally saved dataset, otherwise
+            if FALSE then will load from yFinance. Default TRUE.
     '''
     if columns:
         # Ensure that the correct type is passed for columns
@@ -306,6 +310,10 @@ def load_data(tickers:     list = None,
                     columns = [columns]
                 case tuple():
                     columns = list(columns)
+
+    # Load from default local datafile if not specified
+    if local == True and filename == None:
+        filename = 'sap500alltime.csv'
 
     # Load data from a previously saved file
     if filename != None:
