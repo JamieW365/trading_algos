@@ -313,7 +313,7 @@ def load_data(tickers:     list = None,
 
     # Load from default local datafile if not specified
     if local == True and filename == None:
-        filename = 'sap500alltime.csv'
+        filename = 'sap500alltimesurvivors.csv'
 
     # Load data from a previously saved file
     if filename != None:
